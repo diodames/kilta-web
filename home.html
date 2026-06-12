@@ -99,7 +99,7 @@
       const W = canvas.width;
       const H = canvas.height;
 
-      const BG = [16, 16, 18];
+      const BG = [0, 0, 0];
       const PALETTE = [
         [8, 8, 10],
         [40, 72, 200],
@@ -159,7 +159,7 @@
             const dither = (BAYER[x & 3][y & 3] + 0.5) / 16 - 0.5;
 
             if (r > edge + dither * 0.12) {
-              const grain = noise(x * 0.4, y * 0.4, t * 0.2) * 6;
+              const grain = noise(x * 0.4, y * 0.4, t * 0.2) * 2;
               setPixel(x, y, [
                 BG[0] + grain,
                 BG[1] + grain,
