@@ -38,11 +38,24 @@
       }
 
       canvas {
-        width: min(72vw, 320px);
-        height: min(72vw, 320px);
+        --pixel-size: calc(320px / 96);
+        --grid-size: 96;
+        width: calc(var(--grid-size) * var(--pixel-size));
+        height: calc(var(--grid-size) * var(--pixel-size));
+        background: #000;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
         border-radius: 12px;
+      }
+
+      @media (max-width: 640px) {
+        canvas {
+          --grid-size: 64;
+        }
+
+        body {
+          gap: 1.5rem;
+        }
       }
 
       .label {
@@ -51,35 +64,8 @@
 
       .label span {
         opacity: 0;
-        animation: letter 2.8s ease-in-out infinite;
-      }
-
-      .label span:nth-child(1) {
-        animation-delay: 0s;
-      }
-
-      .label span:nth-child(2) {
-        animation-delay: 0.4s;
-      }
-
-      .label span:nth-child(3) {
-        animation-delay: 0.8s;
-      }
-
-      .label span:nth-child(4) {
-        animation-delay: 1.2s;
-      }
-
-      .label span:nth-child(5) {
-        animation-delay: 1.6s;
-      }
-
-      .label span:nth-child(6) {
-        animation-delay: 2s;
-      }
-
-      .label span:nth-child(7) {
-        animation-delay: 2.4s;
+        animation: letter 3.4s ease-in-out infinite;
+        animation-delay: calc(var(--i) * 0.18s);
       }
 
       @keyframes letter {
@@ -97,22 +83,24 @@
     </style>
   </head>
   <body>
-    <canvas id="blob" width="96" height="96" aria-hidden="true"></canvas>
-    <p class="label" aria-label="loading"><span>l</span><span>o</span><span>a</span><span>d</span><span>i</span><span>n</span><span>g</span></p>
+    <canvas id="blob" aria-hidden="true"></canvas>
+    <p class="label" aria-label="making software"><span style="--i:0">m</span><span style="--i:1">a</span><span style="--i:2">k</span><span style="--i:3">i</span><span style="--i:4">n</span><span style="--i:5">g</span><span style="--i:6">&nbsp;</span><span style="--i:7">s</span><span style="--i:8">o</span><span style="--i:9">f</span><span style="--i:10">t</span><span style="--i:11">w</span><span style="--i:12">a</span><span style="--i:13">r</span><span style="--i:14">e</span></p>
 
     <script>
       const canvas = document.getElementById("blob");
       const ctx = canvas.getContext("2d");
-      const W = canvas.width;
-      const H = canvas.height;
+      const DESKTOP_GRID = 96;
+      const MOBILE_GRID = 64;
+      let W;
+      let H;
 
-      const BG = [16, 16, 18];
+      const BG = [0, 0, 0];
       const PALETTE = [
-        [8, 8, 10],
-        [40, 72, 200],
-        [200, 50, 62],
-        [230, 100, 36],
-        [240, 190, 52],
+        [0, 0, 0],
+        [45, 45, 45],
+        [95, 95, 95],
+        [150, 150, 150],
+        [220, 220, 220],
       ];
 
       const BAYER = [
@@ -122,8 +110,28 @@
         [15, 7, 13, 5],
       ];
 
-      const image = ctx.createImageData(W, H);
-      const pixels = image.data;
+      let image;
+      let pixels;
+
+      function gridSize() {
+        return window.matchMedia("(max-width: 640px)").matches
+          ? MOBILE_GRID
+          : DESKTOP_GRID;
+      }
+
+      function setupCanvas() {
+        const size = gridSize();
+        canvas.width = size;
+        canvas.height = size;
+        canvas.style.setProperty("--grid-size", size);
+        W = size;
+        H = size;
+        image = ctx.createImageData(W, H);
+        pixels = image.data;
+      }
+
+      setupCanvas();
+      window.addEventListener("resize", setupCanvas);
 
       function noise(x, y, t) {
         return (
@@ -152,8 +160,8 @@
       let t = 0;
 
       function draw() {
-        const lightX = Math.cos(t * 0.35);
-        const lightY = Math.sin(t * 0.28) * 0.35;
+        const lightX = Math.cos(t * 0.65);
+        const lightY = Math.sin(t * 0.52) * 0.35;
         const lightZ = 0.65;
 
         for (let y = 0; y < H; y++) {
@@ -166,12 +174,7 @@
             const dither = (BAYER[x & 3][y & 3] + 0.5) / 16 - 0.5;
 
             if (r > edge + dither * 0.12) {
-              const grain = noise(x * 0.4, y * 0.4, t * 0.2) * 6;
-              setPixel(x, y, [
-                BG[0] + grain,
-                BG[1] + grain,
-                BG[2] + grain,
-              ]);
+              setPixel(x, y, BG);
               continue;
             }
 
@@ -202,7 +205,7 @@
         }
 
         ctx.putImageData(image, 0, 0);
-        t += 0.006;
+        t += 0.016;
         requestAnimationFrame(draw);
       }
 
