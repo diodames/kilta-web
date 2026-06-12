@@ -33,6 +33,7 @@
       canvas {
         width: min(72vw, 320px);
         height: min(72vw, 320px);
+        background: #000;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
         border-radius: 12px;
@@ -159,12 +160,7 @@
             const dither = (BAYER[x & 3][y & 3] + 0.5) / 16 - 0.5;
 
             if (r > edge + dither * 0.12) {
-              const grain = noise(x * 0.4, y * 0.4, t * 0.2) * 2;
-              setPixel(x, y, [
-                BG[0] + grain,
-                BG[1] + grain,
-                BG[2] + grain,
-              ]);
+              setPixel(x, y, BG);
               continue;
             }
 
