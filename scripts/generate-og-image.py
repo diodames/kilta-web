@@ -142,7 +142,7 @@ def render_image(canvas_w, canvas_h):
     blob_size = 320
     gap = 32
     radius = 12
-    text = "making software"
+    text = "crafting software"
     text_color = (237, 237, 237)
     font_size = 24
     blob_text_gap = gap
